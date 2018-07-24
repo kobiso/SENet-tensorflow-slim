@@ -1,0 +1,9 @@
+DATASET_DIR=/home/shared/data_zoo/imagenet/tf_records/
+TRAIN_DIR=/home/shared/py3_workspace/senet/train_logs/s2
+CUDA_VISIBLE_DEVICES=4 python train_image_classifier.py \
+    --train_dir=${TRAIN_DIR} \
+    --dataset_name=imagenet \
+    --dataset_split_name=train \
+    --dataset_dir=${DATASET_DIR} \
+    --model_name=resnet_v1_50 \
+    --batch_size=1287

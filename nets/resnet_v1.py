@@ -130,8 +130,14 @@ def bottleneck(inputs,
     if use_bounded_activations:
       # Use clip_by_value to simulate bandpass activation.
       residual = tf.clip_by_value(residual, -6.0, 6.0)
+      # Add SE_block
+      residual = se_block(residual, 'se_block')
+      
       output = tf.nn.relu6(shortcut + residual)
     else:
+      # Add SE_block
+      residual = se_block(residual, 'se_block')
+      
       output = tf.nn.relu(shortcut + residual)
 
     return slim.utils.collect_named_outputs(outputs_collections,
@@ -373,3 +379,27 @@ def resnet_v1_200(inputs,
                    store_non_strided_activations=store_non_strided_activations,
                    reuse=reuse, scope=scope)
 resnet_v1_200.default_image_size = resnet_v1.default_image_size
+
+def se_block(bottom, name, ratio=8):
+  weight_initializer = tf.contrib.layers.variance_scaling_initializer()
+  bias_initializer = tf.constant_initializer(value=0.0)
+
+  # Bottom [N,H,W,C]
+  # Global average pooling
+  with tf.variable_scope(name):
+    channel = bottom.get_shape()[-1]
+    se = tf.reduce_mean(bottom, axis=[1,2], keep_dims=True)
+    assert se.get_shape()[1:] == (1,1,channel)
+    se = tf.layers.dense(se, channel//ratio, activation=tf.nn.relu,
+                                             kernel_initializer=weight_initializer,
+                                             bias_initializer=bias_initializer,
+                                             name='bottleneck_fc')
+    assert se.get_shape()[1:] == (1,1,channel//ratio)
+    se = tf.layers.dense(se, channel, activation=tf.nn.sigmoid,
+                                             kernel_initializer=weight_initializer,
+                                             bias_initializer=bias_initializer,
+                                             name='recover_fc')
+    assert se.get_shape()[1:] == (1,1,channel)
+    # top = tf.multiply(bottom, se, name='scale')
+    top = bottom * se
+  return top
