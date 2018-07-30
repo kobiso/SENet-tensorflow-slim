@@ -53,6 +53,7 @@ from __future__ import print_function
 import tensorflow as tf
 
 from nets import resnet_utils
+from nets.attention_module import se_block
 
 slim = tf.contrib.slim
 resnet_arg_scope = resnet_utils.resnet_arg_scope
@@ -60,7 +61,7 @@ resnet_arg_scope = resnet_utils.resnet_arg_scope
 
 @slim.add_arg_scope
 def bottleneck(inputs, depth, depth_bottleneck, stride, rate=1,
-               outputs_collections=None, scope=None):
+               outputs_collections=None, scope=None, attention_module=None):
   """Bottleneck residual unit variant with BN before convolutions.
 
   This is the full preactivation residual unit variant proposed in [2]. See
@@ -100,6 +101,10 @@ def bottleneck(inputs, depth, depth_bottleneck, stride, rate=1,
     residual = slim.conv2d(residual, depth, [1, 1], stride=1,
                            normalizer_fn=None, activation_fn=None,
                            scope='conv3')
+    
+    # Add SE_block
+    if attention_module == 'se_block':
+      residual = se_block(residual, 'se_block')      
 
     output = shortcut + residual
 
@@ -219,12 +224,12 @@ def resnet_v2(inputs,
           if spatial_squeeze:
             net = tf.squeeze(net, [1, 2], name='SpatialSqueeze')
             end_points[sc.name + '/spatial_squeeze'] = net
-          end_points['predictions'] = slim.softmax(net, scope='predictions')
+          end_points['predictions'] = slim.softmax(net, scope='predictions')       
         return net, end_points
 resnet_v2.default_image_size = 224
 
 
-def resnet_v2_block(scope, base_depth, num_units, stride):
+def resnet_v2_block(scope, base_depth, num_units, stride, attention_module):
   """Helper function for creating a resnet_v2 bottleneck block.
 
   Args:
@@ -240,11 +245,13 @@ def resnet_v2_block(scope, base_depth, num_units, stride):
   return resnet_utils.Block(scope, bottleneck, [{
       'depth': base_depth * 4,
       'depth_bottleneck': base_depth,
-      'stride': 1
+      'stride': 1,
+      'attention_module': attention_module
   }] * (num_units - 1) + [{
       'depth': base_depth * 4,
       'depth_bottleneck': base_depth,
-      'stride': stride
+      'stride': stride,
+      'attention_module': attention_module
   }])
 resnet_v2.default_image_size = 224
 
@@ -256,13 +263,14 @@ def resnet_v2_50(inputs,
                  output_stride=None,
                  spatial_squeeze=True,
                  reuse=None,
-                 scope='resnet_v2_50'):
+                 scope='resnet_v2_50',
+                 attention_module=None):
   """ResNet-50 model of [1]. See resnet_v2() for arg and return description."""
   blocks = [
-      resnet_v2_block('block1', base_depth=64, num_units=3, stride=2),
-      resnet_v2_block('block2', base_depth=128, num_units=4, stride=2),
-      resnet_v2_block('block3', base_depth=256, num_units=6, stride=2),
-      resnet_v2_block('block4', base_depth=512, num_units=3, stride=1),
+      resnet_v2_block('block1', base_depth=64, num_units=3, stride=2, attention_module=attention_module),
+      resnet_v2_block('block2', base_depth=128, num_units=4, stride=2, attention_module=attention_module),
+      resnet_v2_block('block3', base_depth=256, num_units=6, stride=2, attention_module=attention_module),
+      resnet_v2_block('block4', base_depth=512, num_units=3, stride=1, attention_module=attention_module),
   ]
   return resnet_v2(inputs, blocks, num_classes, is_training=is_training,
                    global_pool=global_pool, output_stride=output_stride,
@@ -278,13 +286,14 @@ def resnet_v2_101(inputs,
                   output_stride=None,
                   spatial_squeeze=True,
                   reuse=None,
-                  scope='resnet_v2_101'):
+                  scope='resnet_v2_101',
+                  attention_module=None):
   """ResNet-101 model of [1]. See resnet_v2() for arg and return description."""
   blocks = [
-      resnet_v2_block('block1', base_depth=64, num_units=3, stride=2),
-      resnet_v2_block('block2', base_depth=128, num_units=4, stride=2),
-      resnet_v2_block('block3', base_depth=256, num_units=23, stride=2),
-      resnet_v2_block('block4', base_depth=512, num_units=3, stride=1),
+      resnet_v2_block('block1', base_depth=64, num_units=3, stride=2, attention_module=attention_module),
+      resnet_v2_block('block2', base_depth=128, num_units=4, stride=2, attention_module=attention_module),
+      resnet_v2_block('block3', base_depth=256, num_units=23, stride=2, attention_module=attention_module),
+      resnet_v2_block('block4', base_depth=512, num_units=3, stride=1, attention_module=attention_module),
   ]
   return resnet_v2(inputs, blocks, num_classes, is_training=is_training,
                    global_pool=global_pool, output_stride=output_stride,
@@ -300,13 +309,14 @@ def resnet_v2_152(inputs,
                   output_stride=None,
                   spatial_squeeze=True,
                   reuse=None,
-                  scope='resnet_v2_152'):
+                  scope='resnet_v2_152',
+                  attention_module=None):
   """ResNet-152 model of [1]. See resnet_v2() for arg and return description."""
   blocks = [
-      resnet_v2_block('block1', base_depth=64, num_units=3, stride=2),
-      resnet_v2_block('block2', base_depth=128, num_units=8, stride=2),
-      resnet_v2_block('block3', base_depth=256, num_units=36, stride=2),
-      resnet_v2_block('block4', base_depth=512, num_units=3, stride=1),
+      resnet_v2_block('block1', base_depth=64, num_units=3, stride=2, attention_module=attention_module),
+      resnet_v2_block('block2', base_depth=128, num_units=8, stride=2, attention_module=attention_module),
+      resnet_v2_block('block3', base_depth=256, num_units=36, stride=2, attention_module=attention_module),
+      resnet_v2_block('block4', base_depth=512, num_units=3, stride=1, attention_module=attention_module),
   ]
   return resnet_v2(inputs, blocks, num_classes, is_training=is_training,
                    global_pool=global_pool, output_stride=output_stride,
@@ -322,13 +332,14 @@ def resnet_v2_200(inputs,
                   output_stride=None,
                   spatial_squeeze=True,
                   reuse=None,
-                  scope='resnet_v2_200'):
+                  scope='resnet_v2_200',
+                  attention_module=None):
   """ResNet-200 model of [2]. See resnet_v2() for arg and return description."""
   blocks = [
-      resnet_v2_block('block1', base_depth=64, num_units=3, stride=2),
-      resnet_v2_block('block2', base_depth=128, num_units=24, stride=2),
-      resnet_v2_block('block3', base_depth=256, num_units=36, stride=2),
-      resnet_v2_block('block4', base_depth=512, num_units=3, stride=1),
+      resnet_v2_block('block1', base_depth=64, num_units=3, stride=2, attention_module=attention_module),
+      resnet_v2_block('block2', base_depth=128, num_units=24, stride=2, attention_module=attention_module),
+      resnet_v2_block('block3', base_depth=256, num_units=36, stride=2, attention_module=attention_module),
+      resnet_v2_block('block4', base_depth=512, num_units=3, stride=1, attention_module=attention_module),
   ]
   return resnet_v2(inputs, blocks, num_classes, is_training=is_training,
                    global_pool=global_pool, output_stride=output_stride,

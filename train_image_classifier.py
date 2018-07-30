@@ -223,6 +223,15 @@ tf.app.flags.DEFINE_boolean(
     'ignore_missing_vars', False,
     'When restoring a checkpoint would ignore missing variables.')
 
+##########################
+# Attention Module Flags #
+##########################
+
+tf.app.flags.DEFINE_string(
+    'attention_module', None,
+    'The name of attention module to use.')
+
+
 FLAGS = tf.app.flags.FLAGS
 
 
@@ -420,7 +429,8 @@ def main(_):
         FLAGS.model_name,
         num_classes=(dataset.num_classes - FLAGS.labels_offset),
         weight_decay=FLAGS.weight_decay,
-        is_training=True)
+        is_training=True,
+        attention_module=FLAGS.attention_module)   
 
     #####################################
     # Select the preprocessing function #

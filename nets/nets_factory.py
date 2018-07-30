@@ -100,7 +100,7 @@ arg_scopes_map = {'alexnet_v2': alexnet.alexnet_v2_arg_scope,
                  }
 
 
-def get_network_fn(name, num_classes, weight_decay=0.0, is_training=False):
+def get_network_fn(name, num_classes, weight_decay=0.0, is_training=False, attention_module=None):
   """Returns a network_fn such as `logits, end_points = network_fn(images)`.
 
   Args:
@@ -134,9 +134,11 @@ def get_network_fn(name, num_classes, weight_decay=0.0, is_training=False):
   if name not in networks_map:
     raise ValueError('Name of network unknown %s' % name)
   func = networks_map[name]
-  @functools.wraps(func)
+  @functools.wraps(func)  
   def network_fn(images, **kwargs):
     arg_scope = arg_scopes_map[name](weight_decay=weight_decay)
+    if attention_module is not None:
+      kwargs = {"attention_module": attention_module}
     with slim.arg_scope(arg_scope):
       return func(images, num_classes, is_training=is_training, **kwargs)
   if hasattr(func, 'default_image_size'):

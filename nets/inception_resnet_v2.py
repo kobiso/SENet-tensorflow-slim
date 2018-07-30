@@ -26,11 +26,12 @@ from __future__ import print_function
 
 
 import tensorflow as tf
+from nets.attention_module import se_block
 
 slim = tf.contrib.slim
 
 
-def block35(net, scale=1.0, activation_fn=tf.nn.relu, scope=None, reuse=None):
+def block35(net, scale=1.0, activation_fn=tf.nn.relu, scope=None, reuse=None, attention_module=None):
   """Builds the 35x35 resnet block."""
   with tf.variable_scope(scope, 'Block35', [net], reuse=reuse):
     with tf.variable_scope('Branch_0'):
@@ -48,15 +49,18 @@ def block35(net, scale=1.0, activation_fn=tf.nn.relu, scope=None, reuse=None):
     scaled_up = up * scale
     if activation_fn == tf.nn.relu6:
       # Use clip_by_value to simulate bandpass activation.
-      scaled_up = tf.clip_by_value(scaled_up, -6.0, 6.0)
-
+      scaled_up = tf.clip_by_value(scaled_up, -6.0, 6.0)    
     net += scaled_up
     if activation_fn:
       net = activation_fn(net)
+    # SE_block
+    if attention_module == 'se_block':
+      net = se_block(net, 'se_block')
+
   return net
 
 
-def block17(net, scale=1.0, activation_fn=tf.nn.relu, scope=None, reuse=None):
+def block17(net, scale=1.0, activation_fn=tf.nn.relu, scope=None, reuse=None, attention_module=None):
   """Builds the 17x17 resnet block."""
   with tf.variable_scope(scope, 'Block17', [net], reuse=reuse):
     with tf.variable_scope('Branch_0'):
@@ -79,10 +83,13 @@ def block17(net, scale=1.0, activation_fn=tf.nn.relu, scope=None, reuse=None):
     net += scaled_up
     if activation_fn:
       net = activation_fn(net)
+    # SE_block
+    if attention_module == 'se_block':
+      net = se_block(net, 'se_block')
   return net
 
 
-def block8(net, scale=1.0, activation_fn=tf.nn.relu, scope=None, reuse=None):
+def block8(net, scale=1.0, activation_fn=tf.nn.relu, scope=None, reuse=None, attention_module=None):
   """Builds the 8x8 resnet block."""
   with tf.variable_scope(scope, 'Block8', [net], reuse=reuse):
     with tf.variable_scope('Branch_0'):
@@ -105,6 +112,9 @@ def block8(net, scale=1.0, activation_fn=tf.nn.relu, scope=None, reuse=None):
     net += scaled_up
     if activation_fn:
       net = activation_fn(net)
+    # SE_block
+    if attention_module == 'se_block':
+      net = se_block(net, 'se_block')
   return net
 
 
@@ -113,7 +123,8 @@ def inception_resnet_v2_base(inputs,
                              output_stride=16,
                              align_feature_maps=False,
                              scope=None,
-                             activation_fn=tf.nn.relu):
+                             activation_fn=tf.nn.relu,
+                             attention_module=None):
   """Inception model from  http://arxiv.org/abs/1602.07261.
 
   Constructs an Inception Resnet v2 network from inputs to the given final
@@ -209,9 +220,10 @@ def inception_resnet_v2_base(inputs,
             [tower_conv, tower_conv1_1, tower_conv2_2, tower_pool_1], 3)
 
       if add_and_check_final('Mixed_5b', net): return net, end_points
+      
       # TODO(alemi): Register intermediate endpoints
       net = slim.repeat(net, 10, block35, scale=0.17,
-                        activation_fn=activation_fn)
+                        activation_fn=activation_fn, attention_module=attention_module)
 
       # 17 x 17 x 1088 if output_stride == 8,
       # 33 x 33 x 1088 if output_stride == 16
@@ -237,11 +249,15 @@ def inception_resnet_v2_base(inputs,
         net = tf.concat([tower_conv, tower_conv1_2, tower_pool], 3)
 
       if add_and_check_final('Mixed_6a', net): return net, end_points
+      
+      # SE_block
+      if attention_module == 'se_block':
+        net = se_block(net, 'se_block_6a')
 
       # TODO(alemi): register intermediate endpoints
       with slim.arg_scope([slim.conv2d], rate=2 if use_atrous else 1):
         net = slim.repeat(net, 20, block17, scale=0.10,
-                          activation_fn=activation_fn)
+                          activation_fn=activation_fn, attention_module=attention_module)
       if add_and_check_final('PreAuxLogits', net): return net, end_points
 
       if output_stride == 8:
@@ -276,10 +292,14 @@ def inception_resnet_v2_base(inputs,
             [tower_conv_1, tower_conv1_1, tower_conv2_2, tower_pool], 3)
 
       if add_and_check_final('Mixed_7a', net): return net, end_points
+      
+      # SE_block
+      if attention_module == 'se_block':
+        net = se_block(net, 'se_block_7a')
 
       # TODO(alemi): register intermediate endpoints
-      net = slim.repeat(net, 9, block8, scale=0.20, activation_fn=activation_fn)
-      net = block8(net, activation_fn=None)
+      net = slim.repeat(net, 9, block8, scale=0.20, activation_fn=activation_fn, attention_module=attention_module)
+      net = block8(net, activation_fn=None, attention_module=attention_module)
 
       # 8 x 8 x 1536
       net = slim.conv2d(net, 1536, 1, scope='Conv2d_7b_1x1')
@@ -293,7 +313,8 @@ def inception_resnet_v2(inputs, num_classes=1001, is_training=True,
                         reuse=None,
                         scope='InceptionResnetV2',
                         create_aux_logits=True,
-                        activation_fn=tf.nn.relu):
+                        activation_fn=tf.nn.relu,
+                        attention_module=None):
   """Creates the Inception Resnet V2 model.
 
   Args:
@@ -325,7 +346,8 @@ def inception_resnet_v2(inputs, num_classes=1001, is_training=True,
                         is_training=is_training):
 
       net, end_points = inception_resnet_v2_base(inputs, scope=scope,
-                                                 activation_fn=activation_fn)
+                                                 activation_fn=activation_fn,
+                                                 attention_module=attention_module)
 
       if create_aux_logits and num_classes:
         with tf.variable_scope('AuxLogits'):
