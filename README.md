@@ -15,6 +15,26 @@ This is a Tensorflow implementation of ["Squeeze-and-Excitation Networks"](https
   <img src="https://github.com/kobiso/SENet-tensorflow-slim/blob/master/figures/res.png"  width="420">
 </div>
 
+### Single-crop error rates (%) on the ImageNet validation set
+
+<div align="center">
+  <img src="https://github.com/kobiso/SENet-tensorflow-slim/blob/master/figures/ex1.png">
+</div>
+
+<div align="center">
+  <img src="https://github.com/kobiso/SENet-tensorflow-slim/blob/master/figures/ex2.png"  width="420">
+</div>
+
+## Prerequisites
+- Python 3.x
+- TensorFlow 1.x
+- TF-slim
+  - Check the ['installation' part of TF-Slim image models README](https://github.com/tensorflow/models/tree/master/research/slim#installation).
+
+## Prepare Data set
+You should prepare your own dataset or open dataset (Cifar10, flowers, MNIST, ImageNet).
+For preparing dataset, you can follow the ['preparing the datasets' part in TF-Slim image models README](https://github.com/tensorflow/models/tree/master/research/slim#preparing-the-datasets).
+
 ## SE-block Supportive Models
 This project is based on TensorFlow-Slim image classification model library.
 Every image classification model in TensorFlow-Slim can be run the same.
@@ -31,15 +51,13 @@ And, you can run SE-block added models in the below list by adding one argument 
 - ResNet V2 152 + SE
 - ResNet V2 200 + SE
 
-## Prerequisites
-- Python 3.x
-- TensorFlow 1.x
-- TF-slim
-  - Check the [installation part of TF-Slim image models README](https://github.com/tensorflow/models/tree/master/research/slim#installation).
+### Change *Reduction ratio*
+To change *reduction ratio*, you have to manually set the ratio on `def se_block(residual, name, ratio=8)` method in `SENet-tensorflow-slim/nets/attention_module.py`.
 
-## Prepare Data set
-You should prepare your own dataset or open dataset (Cifar10, flowers, MNIST, ImageNet).
-For preparing dataset, you can follow the ['preparing the datasets' part in TF-Slim image models README](https://github.com/tensorflow/models/tree/master/research/slim#preparing-the-datasets).
+#### Single-crop error rates (%) on ImageNet validation set at different reduction ratios
+<div align="center">
+  <img src="https://github.com/kobiso/SENet-tensorflow-slim/blob/master/figures/ex5.png"  width="420">
+</div>
 
 ## Train a Model
 ### Train a model with SE-block
