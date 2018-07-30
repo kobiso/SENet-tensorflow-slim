@@ -18,7 +18,7 @@ This is a Tensorflow implementation of ["Squeeze-and-Excitation Networks"](https
 ## SE-block Supportive Models
 This project is based on TensorFlow-Slim image classification model library.
 Every image classification model in TensorFlow-Slim can be run the same.
-And, you can run SE-block added models in the below list by adding one argument `--attention_module='se_block'`.
+And, you can run SE-block added models in the below list by adding one argument `--attention_module='se_block'` when you train or evaluate a model.
 
 - Inception V4 + SE
 - Inception-ResNet-v2 + SE
@@ -58,7 +58,7 @@ CUDA_VISIBLE_DEVICES=0 python train_image_classifier.py \
     --attention_module=se_block
 ```
 
-### Train the model without SE-block
+### Train a model without SE-block
 Below script gives you an example of training a model without SE-block.
 ```
 DATASET_DIR=/DIRECTORY/TO/DATASET
@@ -72,11 +72,11 @@ CUDA_VISIBLE_DEVICES=0 python train_image_classifier.py \
     --batch_size=1
 ```
 
-## Evaluate the Model
+## Evaluate a Model
 To keep track of validation accuracy while training, you can use `eval_image_classifier_loop.py` which evaluate the performance at multiple checkpoints during training.
 If you want to just evaluate a model once, you can use `eval_image_classifier.py`.
 
-### Evaluate the model with SE-block
+### Evaluate a model with SE-block
 Below script gives you an example of evaluating a model with SE-block during training.
 Don't forget to put an argument `--attention_module='se_block'`.
 ```
@@ -95,7 +95,7 @@ CUDA_VISIBLE_DEVICES=0 python eval_image_classifier_loop.py \
     --attention_module=se_block
 ```
 
-### Evaluate the model without SE-block
+### Evaluate a model without SE-block
 Below script gives you an example of evaluating a model without SE-block during training.
 ```
 DATASET_DIR=/DIRECTORY/TO/DATASET
