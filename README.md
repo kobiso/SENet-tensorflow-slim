@@ -2,7 +2,7 @@
 This is a Tensorflow implementation of ["Squeeze-and-Excitation Networks"](https://arxiv.org/pdf/1709.01507) aiming to be compatible on the [TensorFlow-Slim image classification model library](https://github.com/tensorflow/models/tree/master/research/slim).
 
 ## Squeeze-and-Excitation Networks
-**SENet** proposes a architectural unit called *"Squeeze-and-Excitation" (SE)* block to improve the representational power of a network by explicitly modelling the interdependencies between the channels of its convolutional features.
+**SENet** proposes an architectural unit called *"Squeeze-and-Excitation" (SE)* block to improve the representational power of a network by explicitly modelling the **interdependencies between the channels** of its convolutional features.
 
 ### Diagram of a SE-Block
 <div align="center">
@@ -44,6 +44,7 @@ For preparing dataset, you can follow the ['preparing the datasets' part in TF-S
 ## Train a Model
 ### Train a model with SE-block
 Below script gives you an example of training a model with SE-block.
+Don't forget to put an argument `--attention_module='se_block'`.
 ```
 DATASET_DIR=/DIRECTORY/TO/DATASET
 TRAIN_DIR=/DIRECTORY/TO/TRAIN
@@ -77,6 +78,7 @@ If you want to just evaluate a model once, you can use `eval_image_classifier.py
 
 ### Evaluate the model with SE-block
 Below script gives you an example of evaluating a model with SE-block during training.
+Don't forget to put an argument `--attention_module='se_block'`.
 ```
 DATASET_DIR=/DIRECTORY/TO/DATASET
 CHECKPOINT_FILE=/DIRECTORY/TO/CHECKPOINT
