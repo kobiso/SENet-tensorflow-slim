@@ -79,9 +79,6 @@ tf.app.flags.DEFINE_float(
 tf.app.flags.DEFINE_integer(
     'eval_image_size', None, 'Eval image size')
 
-tf.app.flags.DEFINE_integer(
-    'eval_interval_secs', 600, 'eval_interval_secs')
-
 FLAGS = tf.app.flags.FLAGS
 
 
@@ -161,13 +158,11 @@ def main(_):
     })
 
     # Print the summaries to screen.
-    summary_ops = []
     for name, value in names_to_values.items():
       summary_name = 'eval/%s' % name
       op = tf.summary.scalar(summary_name, value, collections=[])
       op = tf.Print(op, [value], summary_name)
       tf.add_to_collection(tf.GraphKeys.SUMMARIES, op)
-      summary_ops.append(op)
 
     # TODO(sguada) use num_epochs=1
     if FLAGS.max_num_batches:
@@ -175,25 +170,14 @@ def main(_):
     else:
       # This ensures that we make a single pass over all of the data.
       num_batches = math.ceil(dataset.num_samples / float(FLAGS.batch_size))
-    """
+
     if tf.gfile.IsDirectory(FLAGS.checkpoint_path):
       checkpoint_path = tf.train.latest_checkpoint(FLAGS.checkpoint_path)
     else:
       checkpoint_path = FLAGS.checkpoint_path
-    """
 
-    tf.logging.info('Evaluating %s' % FLAGS.checkpoint_path)
+    tf.logging.info('Evaluating %s' % checkpoint_path)
 
-    slim.evaluation.evaluation_loop(
-    master=FLAGS.master,
-    checkpoint_dir=FLAGS.checkpoint_path,
-    logdir=FLAGS.eval_dir,
-    num_evals=num_batches,
-    eval_op=list(names_to_updates.values()),
-    summary_op=tf.summary.merge(summary_ops),
-    eval_interval_secs=FLAGS.eval_interval_secs,
-    variables_to_restore=variables_to_restore)
-    """
     slim.evaluation.evaluate_once(
         master=FLAGS.master,
         checkpoint_path=checkpoint_path,
@@ -201,7 +185,6 @@ def main(_):
         num_evals=num_batches,
         eval_op=list(names_to_updates.values()),
         variables_to_restore=variables_to_restore)
-    """    
 
 
 if __name__ == '__main__':
