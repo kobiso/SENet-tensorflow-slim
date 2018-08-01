@@ -79,6 +79,14 @@ tf.app.flags.DEFINE_float(
 tf.app.flags.DEFINE_integer(
     'eval_image_size', None, 'Eval image size')
 
+##########################
+# Attention Module Flags #
+##########################
+
+tf.app.flags.DEFINE_string(
+    'attention_module', None,
+    'The name of attention module to use.')
+
 FLAGS = tf.app.flags.FLAGS
 
 
@@ -102,7 +110,8 @@ def main(_):
     network_fn = nets_factory.get_network_fn(
         FLAGS.model_name,
         num_classes=(dataset.num_classes - FLAGS.labels_offset),
-        is_training=False)
+        is_training=False,
+        attention_module=FLAGS.attention_module)
 
     ##############################################################
     # Create a dataset provider that loads data from the dataset #
@@ -177,6 +186,10 @@ def main(_):
       checkpoint_path = FLAGS.checkpoint_path
 
     tf.logging.info('Evaluating %s' % checkpoint_path)
+    
+    # GPU memory dynamic allocation
+    session_config = tf.ConfigProto()
+    session_config.gpu_options.allow_growth = True
 
     slim.evaluation.evaluate_once(
         master=FLAGS.master,
@@ -184,7 +197,8 @@ def main(_):
         logdir=FLAGS.eval_dir,
         num_evals=num_batches,
         eval_op=list(names_to_updates.values()),
-        variables_to_restore=variables_to_restore)
+        variables_to_restore=variables_to_restore,
+        session_config=session_config)
 
 
 if __name__ == '__main__':

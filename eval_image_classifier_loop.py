@@ -82,6 +82,14 @@ tf.app.flags.DEFINE_integer(
 tf.app.flags.DEFINE_integer(
     'eval_interval_secs', 600, 'eval_interval_secs')
 
+##########################
+# Attention Module Flags #
+##########################
+
+tf.app.flags.DEFINE_string(
+    'attention_module', None,
+    'The name of attention module to use.')
+
 FLAGS = tf.app.flags.FLAGS
 
 
@@ -105,7 +113,8 @@ def main(_):
     network_fn = nets_factory.get_network_fn(
         FLAGS.model_name,
         num_classes=(dataset.num_classes - FLAGS.labels_offset),
-        is_training=False)
+        is_training=False,
+        attention_module=FLAGS.attention_module)
 
     ##############################################################
     # Create a dataset provider that loads data from the dataset #
@@ -184,6 +193,10 @@ def main(_):
 
     tf.logging.info('Evaluating %s' % FLAGS.checkpoint_path)
 
+    # GPU memory dynamic allocation
+    session_config = tf.ConfigProto()
+    session_config.gpu_options.allow_growth = True
+
     slim.evaluation.evaluation_loop(
     master=FLAGS.master,
     checkpoint_dir=FLAGS.checkpoint_path,
@@ -192,7 +205,8 @@ def main(_):
     eval_op=list(names_to_updates.values()),
     summary_op=tf.summary.merge(summary_ops),
     eval_interval_secs=FLAGS.eval_interval_secs,
-    variables_to_restore=variables_to_restore)
+    variables_to_restore=variables_to_restore,
+    session_config=session_config)
     """
     slim.evaluation.evaluate_once(
         master=FLAGS.master,
