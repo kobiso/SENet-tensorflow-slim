@@ -135,8 +135,8 @@ CUDA_VISIBLE_DEVICES=0 python eval_image_classifier_loop.py \
 - Repository: [CBAM-TensorFlow](https://github.com/kobiso/CBAM-tensorflow)
 
 ## Reference
-- [Squeeze-and-Excitation Networks](https://arxiv.org/pdf/1709.01507)
-- [TensorFlow-Slim image classification model library](https://github.com/tensorflow/models/tree/master/research/slim)
+- Paper: [Squeeze-and-Excitation Networks](https://arxiv.org/pdf/1709.01507)
+- Repository: [TensorFlow-Slim image classification model library](https://github.com/tensorflow/models/tree/master/research/slim)
   
 ## Author
 Byung Soo Ko / kobiso62@gmail.com
