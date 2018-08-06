@@ -62,7 +62,7 @@ To change *reduction ratio*, you have to manually set the ratio on `def se_block
 ## Train a Model
 ### Train a model with SE-block
 Below script gives you an example of training a model with SE-block.
-Don't forget to put an argument `--attention_module='se_block'`.
+Don't forget to put an argument `--attention_module=se_block`.
 ```
 DATASET_DIR=/DIRECTORY/TO/DATASET
 TRAIN_DIR=/DIRECTORY/TO/TRAIN
@@ -71,8 +71,8 @@ CUDA_VISIBLE_DEVICES=0 python train_image_classifier.py \
     --dataset_name=imagenet \
     --dataset_split_name=train \
     --dataset_dir=${DATASET_DIR} \
-    --model_name=inception_resnet_v2 \
-    --batch_size=1 \
+    --model_name=resnet_v1_50 \
+    --batch_size=100 \
     --attention_module=se_block
 ```
 
@@ -86,8 +86,8 @@ CUDA_VISIBLE_DEVICES=0 python train_image_classifier.py \
     --dataset_name=imagenet \
     --dataset_split_name=train \
     --dataset_dir=${DATASET_DIR} \
-    --model_name=inception_resnet_v2 \
-    --batch_size=1
+    --model_name=resnet_v1_50 \
+    --batch_size=100
 ```
 
 ## Evaluate a Model
@@ -96,7 +96,7 @@ If you want to just evaluate a model once, you can use `eval_image_classifier.py
 
 ### Evaluate a model with SE-block
 Below script gives you an example of evaluating a model with SE-block during training.
-Don't forget to put an argument `--attention_module='se_block'`.
+Don't forget to put an argument `--attention_module=se_block`.
 ```
 DATASET_DIR=/DIRECTORY/TO/DATASET
 CHECKPOINT_FILE=/DIRECTORY/TO/CHECKPOINT
