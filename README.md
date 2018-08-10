@@ -133,6 +133,7 @@ CUDA_VISIBLE_DEVICES=0 python eval_image_classifier_loop.py \
 ## Related Works
 - Repository: [CBAM-TensorFlow-Slim](https://github.com/kobiso/CBAM-tensorflow-slim)
 - Repository: [CBAM-TensorFlow](https://github.com/kobiso/CBAM-tensorflow)
+- Repository: [CBAM-Keras](https://github.com/kobiso/CBAM-keras)
 
 ## Reference
 - Paper: [Squeeze-and-Excitation Networks](https://arxiv.org/pdf/1709.01507)
