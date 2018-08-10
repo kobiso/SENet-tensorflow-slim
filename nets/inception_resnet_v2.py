@@ -50,12 +50,14 @@ def block35(net, scale=1.0, activation_fn=tf.nn.relu, scope=None, reuse=None, at
     if activation_fn == tf.nn.relu6:
       # Use clip_by_value to simulate bandpass activation.
       scaled_up = tf.clip_by_value(scaled_up, -6.0, 6.0)    
-    net += scaled_up
-    if activation_fn:
-      net = activation_fn(net)
+
     # SE_block
     if attention_module == 'se_block':
       net = se_block(net, 'se_block')
+
+    net += scaled_up
+    if activation_fn:
+      net = activation_fn(net)
 
   return net
 
@@ -80,12 +82,14 @@ def block17(net, scale=1.0, activation_fn=tf.nn.relu, scope=None, reuse=None, at
       # Use clip_by_value to simulate bandpass activation.
       scaled_up = tf.clip_by_value(scaled_up, -6.0, 6.0)
 
-    net += scaled_up
-    if activation_fn:
-      net = activation_fn(net)
     # SE_block
     if attention_module == 'se_block':
       net = se_block(net, 'se_block')
+
+    net += scaled_up
+    if activation_fn:
+      net = activation_fn(net)
+
   return net
 
 
@@ -109,12 +113,14 @@ def block8(net, scale=1.0, activation_fn=tf.nn.relu, scope=None, reuse=None, att
       # Use clip_by_value to simulate bandpass activation.
       scaled_up = tf.clip_by_value(scaled_up, -6.0, 6.0)
 
-    net += scaled_up
-    if activation_fn:
-      net = activation_fn(net)
     # SE_block
     if attention_module == 'se_block':
       net = se_block(net, 'se_block')
+
+    net += scaled_up
+    if activation_fn:
+      net = activation_fn(net)
+
   return net
 
 
@@ -249,10 +255,6 @@ def inception_resnet_v2_base(inputs,
         net = tf.concat([tower_conv, tower_conv1_2, tower_pool], 3)
 
       if add_and_check_final('Mixed_6a', net): return net, end_points
-      
-      # SE_block
-      if attention_module == 'se_block':
-        net = se_block(net, 'se_block_6a')
 
       # TODO(alemi): register intermediate endpoints
       with slim.arg_scope([slim.conv2d], rate=2 if use_atrous else 1):
@@ -292,10 +294,6 @@ def inception_resnet_v2_base(inputs,
             [tower_conv_1, tower_conv1_1, tower_conv2_2, tower_pool], 3)
 
       if add_and_check_final('Mixed_7a', net): return net, end_points
-      
-      # SE_block
-      if attention_module == 'se_block':
-        net = se_block(net, 'se_block_7a')
 
       # TODO(alemi): register intermediate endpoints
       net = slim.repeat(net, 9, block8, scale=0.20, activation_fn=activation_fn, attention_module=attention_module)
