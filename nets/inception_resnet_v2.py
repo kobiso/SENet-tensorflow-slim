@@ -53,7 +53,7 @@ def block35(net, scale=1.0, activation_fn=tf.nn.relu, scope=None, reuse=None, at
 
     # SE_block
     if attention_module == 'se_block':
-      net = se_block(net, 'se_block')
+      scaled_up = se_block(scaled_up, 'se_block')
 
     net += scaled_up
     if activation_fn:
@@ -84,7 +84,7 @@ def block17(net, scale=1.0, activation_fn=tf.nn.relu, scope=None, reuse=None, at
 
     # SE_block
     if attention_module == 'se_block':
-      net = se_block(net, 'se_block')
+      scaled_up = se_block(scaled_up, 'se_block')
 
     net += scaled_up
     if activation_fn:
@@ -115,7 +115,7 @@ def block8(net, scale=1.0, activation_fn=tf.nn.relu, scope=None, reuse=None, att
 
     # SE_block
     if attention_module == 'se_block':
-      net = se_block(net, 'se_block')
+      scaled_up = se_block(scaled_up, 'se_block')
 
     net += scaled_up
     if activation_fn:

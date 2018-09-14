@@ -4,7 +4,7 @@ from __future__ import print_function
 
 import tensorflow as tf
 
-def se_block(residual, name, ratio=8):
+def se_block(input_feature, name, ratio=8):
   """Contains the implementation of Squeeze-and-Excitation block.
   As described in https://arxiv.org/abs/1709.01507.
   """
@@ -13,9 +13,9 @@ def se_block(residual, name, ratio=8):
   bias_initializer = tf.constant_initializer(value=0.0)
 
   with tf.variable_scope(name):
-    channel = residual.get_shape()[-1]
+    channel = input_feature.get_shape()[-1]
     # Global average pooling
-    squeeze = tf.reduce_mean(residual, axis=[1,2], keepdims=True)    
+    squeeze = tf.reduce_mean(input_feature, axis=[1,2], keepdims=True)    
     excitation = tf.layers.dense(inputs=squeeze,
                                  units=channel//ratio,
                                  activation=tf.nn.relu,
@@ -28,6 +28,5 @@ def se_block(residual, name, ratio=8):
                                  kernel_initializer=kernel_initializer,
                                  bias_initializer=bias_initializer,
                                  name='recover_fc')    
-    # top = tf.multiply(bottom, se, name='scale')
-    scale = residual * excitation    
+    scale = input_feature * excitation    
   return scale
